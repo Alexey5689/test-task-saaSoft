@@ -1,5 +1,9 @@
 <script setup>
 import AddAccount from '@/components/AddAccount.vue';
+import AccountList from '@/components/AccountList.vue';
+import { useAccountStore } from '@/stores/account';
+
+const accountStore = useAccountStore();
 </script>
 <template>
     <header class="header container">
@@ -7,6 +11,7 @@ import AddAccount from '@/components/AddAccount.vue';
     </header>
     <main class="container">
         <add-account />
+        <account-list />
     </main>
 </template>
 
@@ -15,6 +20,6 @@ import AddAccount from '@/components/AddAccount.vue';
     padding-top: 50px;
 }
 .section {
-    padding-block: 50px;
+    padding-block: 25px;
 }
 </style>
