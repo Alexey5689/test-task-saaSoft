@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Account, AccountList } from '@/types/accountType';
 
 export const useAccountStore = defineStore('account', () => {
@@ -31,6 +31,7 @@ export const useAccountStore = defineStore('account', () => {
             type: '',
             login: '',
             password: '',
+            isValid: false,
             ...newAccount,
         };
         accounts.value.data.push(accountWithId);
@@ -40,8 +41,6 @@ export const useAccountStore = defineStore('account', () => {
     function validateField(accountId: number, field: string, value: string): boolean {
         const account = accounts.value.data.find((a) => a.id === accountId);
         if (!account) return false;
-
-        // Инициализируем состояние валидации для аккаунта, если его нет
         if (!validationState.value[accountId]) {
             validationState.value[accountId] = {
                 type: false,
@@ -68,19 +67,19 @@ export const useAccountStore = defineStore('account', () => {
             isValid = account.type === 'LDAP' || (value.trim().length > 0 && value.length <= 100);
             validationState.value[accountId].password = isValid;
         }
-
-        // Проверяем все поля
         const allValid =
             validationState.value[accountId].type &&
             validationState.value[accountId].login &&
             validationState.value[accountId].password;
 
         if (allValid) {
+            account.isValid = true;
             saveToLocalStorage();
         }
 
         return isValid;
     }
+
     function updateMark(accountId: number, markString: string) {
         const account = accounts.value.data.find((a) => a.id === accountId);
         if (!account) return;
@@ -96,6 +95,13 @@ export const useAccountStore = defineStore('account', () => {
         accounts.value.data = accounts.value.data.filter((item) => item.id !== id);
         saveToLocalStorage();
     }
+    watch(
+        () => accounts.value.data.filter((account) => account.isValid), // Следим только за валидными
+        (validAccounts) => {
+            localStorage.setItem('accounts', JSON.stringify(validAccounts));
+        },
+        { deep: true },
+    );
 
     return {
         account,

@@ -5,6 +5,7 @@ export interface Account {
     login: string;
     password: string | null;
     showPassword: boolean;
+    isValid: boolean;
 }
 
 export interface AccountList<T extends Account> {
