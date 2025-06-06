@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { useAccountStore } from '@/stores/account';
+<script setup>
+import { useAccountStore } from '@/stores/accounts/account.ts';
 
 const accountStore = useAccountStore();
 </script>
@@ -12,37 +12,76 @@ const accountStore = useAccountStore();
             <li>Логин</li>
             <li>Пароль</li>
         </ul>
-        <div class="section-body">
-            <div class="section-item">
+        <div v-if="accountStore.getAccounts.length" class="section-body">
+            <div v-for="account in accountStore.getAccounts" :key="account.id" class="section-item">
                 <div>
-                    <textarea class="form-control flex-fill"></textarea>
+                    <textarea
+                        class="form-control flex-fill"
+                        :value="accountStore.getMarkAsString(account.id)"
+                        @input="(e) => accountStore.updateMark(account.id, e.target.value)"
+                        @blur="accountStore.validateField(account.id, 'mark', accountStore.getMarkAsString(account.id))"
+                        maxlength="50"
+                    ></textarea>
                 </div>
                 <div>
-                    <select class="form-select flex-fill" aria-label="Default select example">
-                        <option selected>Выберите тип</option>
+                    <select
+                        v-model="account.type"
+                        class="form-select flex-fill"
+                        aria-label="Default select example"
+                        :class="{ 'is-invalid': account.type === '' }"
+                        @change="accountStore.validateField(account.id, 'type', account.type)"
+                    >
+                        <option value="" selected>Выберите тип</option>
                         <option value="Локальная">Локальная</option>
                         <option value="LDAP">LDAP</option>
                     </select>
                 </div>
-                <div><input type="text" class="form-control flex-fill" /></div>
-                <div>
-                    <input :type="accountStore.getShowPass ? 'text' : 'password'" class="form-control" />
+
+                <div :style="{ width: account.type === 'LDAP' ? '640px' : '' }">
+                    <input
+                        :style="{ width: account.type === 'LDAP' ? '608px' : '' }"
+                        v-model="account.login"
+                        type="text"
+                        class="form-control flex-fill"
+                        :class="{ 'is-invalid': !accountStore.validateField(account.id, 'login', account.login) }"
+                        maxlength="100"
+                        @blur="accountStore.validateField(account.id, 'login', account.login)"
+                        @input="accountStore.validateField(account.id, 'login', account.login)"
+                        required
+                    />
+                </div>
+                <div v-if="account.type === 'Локальная' || account.type === ''">
+                    <input
+                        v-model="account.password"
+                        :type="account.showPassword ? 'text' : 'password'"
+                        class="form-control"
+                        maxlength="100"
+                        :class="{ 'is-invalid': !accountStore.validateField(account.id, 'password', account.password) }"
+                        @blur="accountStore.validateField(account.id, 'password', account.password)"
+                        required
+                    />
                     <button
+                        v-if="accountStore.validateField(account.id, 'password', account.password)"
                         type="button"
-                        @click="accountStore.showPass = !accountStore.showPass"
+                        @click="accountStore.isShowPassword(account.id)"
                         class="btn position-absolute translate-middle-y"
                         aria-label="Показать пароль"
                     >
-                        <i :class="accountStore.getShowPass ? 'bi-eye-slash' : 'bi-eye'"></i>
+                        <i :class="account.showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
                     </button>
                 </div>
                 <div>
-                    <button class="btn flex-shrink-0 button-trash" aria-label="Удалить">
+                    <button
+                        @click="accountStore.removeAccount(account.id)"
+                        class="btn flex-shrink-0 btn-outline-danger button-trash"
+                        aria-label="Удалить"
+                    >
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
             </div>
         </div>
+        <div v-else class="text-bg-danger p-3">Список учетных записей пуст</div>
     </section>
 </template>
 <style scoped>
