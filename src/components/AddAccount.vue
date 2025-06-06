@@ -1,6 +1,5 @@
-<script setup lang="ts">
-import { useAccountStore } from '@/stores/account';
-
+<script setup>
+import { useAccountStore } from '@/stores/accounts/account.ts';
 const accountStore = useAccountStore();
 </script>
 <template>

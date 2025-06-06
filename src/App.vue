@@ -1,7 +1,7 @@
 <script setup>
 import AddAccount from '@/components/AddAccount.vue';
 import AccountList from '@/components/AccountList.vue';
-import { useAccountStore } from '@/stores/account';
+import { useAccountStore } from '@/stores/accounts/account';
 
 const accountStore = useAccountStore();
 </script>
