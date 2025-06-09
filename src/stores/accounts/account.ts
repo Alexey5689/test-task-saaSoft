@@ -57,6 +57,7 @@ export const useAccountStore = defineStore('account', () => {
             if (value === 'LDAP') {
                 account.password = null;
                 account.showPassword = false;
+                validationState.value[accountId].password = isValid;
                 isValid = true;
             }
             validationState.value[accountId].type = isValid;
@@ -96,7 +97,7 @@ export const useAccountStore = defineStore('account', () => {
         saveToLocalStorage();
     }
     watch(
-        () => accounts.value.data.filter((account) => account.isValid), // Следим только за валидными
+        () => accounts.value.data.filter((account) => account.isValid),
         (validAccounts) => {
             localStorage.setItem('accounts', JSON.stringify(validAccounts));
         },
